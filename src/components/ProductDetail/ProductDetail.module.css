@@ -10,110 +10,15 @@
   margin-top: 2rem;
 }
 
-.imageSection {
-  position: sticky;
-  top: 100px;
-  align-self: start;
-}
-
-.image {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 8px;
-  background: var(--image-bg);
-}
-
-.info {
+.infoSection {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-primary);
-}
-
-.price {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  margin: 0;
-}
-
-.description {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--secondary-bg);
-  border-radius: 8px;
-}
-
-.metaItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.metaLabel {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-.metaValue {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.backLink:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
   .product {
     grid-template-columns: 1fr;
     gap: 2rem;
-  }
-
-  .imageSection {
-    position: static;
-  }
-
-  .title {
-    font-size: 1.5rem;
-  }
-
-  .price {
-    font-size: 2rem;
   }
 }

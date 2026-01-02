@@ -11,11 +11,6 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCartContext();
-  const discount = product.discountPercentage;
-  const hasDiscount = discount > 0;
-  const originalPrice = hasDiscount
-    ? product.price / (1 - discount / 100)
-    : null;
   const isLowStock = product.stock < 10;
 
   return (
@@ -26,9 +21,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         className={styles.cardLink}
       >
         <div className={styles.imageWrapper}>
-          {hasDiscount && (
-            <div className={styles.badge}>{Math.round(discount)}% OFF</div>
-          )}
           <Card.Image src={product.thumbnail} alt={product.title} />
         </div>
       </Link>
@@ -53,16 +45,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         <div className={styles.priceSection}>
           <Card.Price>${product.price.toFixed(2)}</Card.Price>
-          {hasDiscount && originalPrice && (
-            <>
-              <span className={styles.originalPrice}>
-                ${originalPrice.toFixed(2)}
-              </span>
-              <span className={styles.savings}>
-                Save ${(originalPrice - product.price).toFixed(2)}
-              </span>
-            </>
-          )}
         </div>
 
         <div className={isLowStock ? styles.lowStock : styles.stock}>

@@ -5,8 +5,7 @@ import { Header } from '../../components/Header';
 import { ProductDetail } from '../../components/ProductDetail';
 
 const ProductPage = () => {
-  const { productId } = Route.useParams();
-  const { data: product, isLoading, error } = useProduct(Number(productId));
+  const { data: product, isLoading, error } = useProduct();
 
   return (
     <Layout>
@@ -18,7 +17,7 @@ const ProductPage = () => {
 
         {error && <p>Error loading product: {error.message}</p>}
 
-        {product && <ProductDetail product={product} />}
+        {product && <ProductDetail />}
       </Layout.Main>
     </Layout>
   );

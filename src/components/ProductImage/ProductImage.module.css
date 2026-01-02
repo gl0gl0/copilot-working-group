@@ -1,0 +1,19 @@
+.imageSection {
+  position: sticky;
+  top: 100px;
+  align-self: start;
+}
+
+.image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--image-bg);
+}
+
+@media (max-width: 768px) {
+  .imageSection {
+    position: static;
+  }
+}
