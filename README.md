@@ -10,6 +10,13 @@ This repository hosts hands-on workshops to learn and practice GitHub Copilot—
 - Go to your forked repo settings -> General and scroll down and tick "Issues" in the "Features" section
   ![Image of github settings](assets/images/enable_issues.png)
 
+## Prompt Engineering Guides
+
+This repository includes example prompt guides to help you write effective Copilot prompts:
+
+- [Migrating useQuery to useSuspenseQuery](docs/PROMPT_GUIDE_USEQUERY_TO_USESUSPENSEQUERY.md) - A comprehensive guide for writing Copilot prompts to migrate TanStack Query hooks to use React Suspense
+  - [Quick Reference Version](docs/QUICK_PROMPT_USEQUERY_MIGRATION.md) - Ready-to-copy prompt for immediate use
+
 ## Useful links
 
 - [What is GitHub Copilot](https://docs.github.com/en/copilot/get-started/what-is-github-copilot)
