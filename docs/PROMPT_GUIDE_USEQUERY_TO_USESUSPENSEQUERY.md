@@ -63,17 +63,19 @@ Migrate all TanStack Query useQuery hooks to useSuspenseQuery to enable React Su
 - Add an Error Boundary in the route configuration
 - Update data destructuring (no need for optional chaining since data is guaranteed)
 
-### 3. Update Child Components (if needed)
+### 3. Update Child Components
 
-The following components consume useProduct hook and may need updates:
-- src/components/ProductActions/index.tsx
-- src/components/ProductMeta/index.tsx
-- src/components/ProductImage/index.tsx
-- src/components/ProductInfo/index.tsx
+The following components consume useProduct hook and need updates to remove optional chaining:
+- **src/components/ProductActions/index.tsx** - Remove `product &&` check in button onClick
+- **src/components/ProductMeta/index.tsx** - Remove all `product?.` optional chaining (use `product.` instead)
+- **src/components/ProductImage/index.tsx** - Remove `product?.` optional chaining
+- **src/components/ProductInfo/index.tsx** - Remove `product?.` optional chaining
 
-These components should work without changes since they already assume data is available, but verify that:
-- No optional chaining is needed (data is guaranteed to exist)
-- No manual loading/error states are present
+Since data is guaranteed to exist with useSuspenseQuery:
+- Change `product?.brand` to `product.brand`
+- Change `product?.category` to `product.category`
+- Change `product && addToCart(product)` to `addToCart(product)`
+- And so on for all optional chaining on the product object
 
 ### 4. Update Tests
 
