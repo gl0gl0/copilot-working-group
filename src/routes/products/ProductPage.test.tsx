@@ -1,11 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, render, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createMemoryHistory, createRootRoute, createRoute, createRouter, RouterProvider } from '@tanstack/react-router';
-import { CartProvider } from '../../contexts/CartContext';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
 import { useProduct } from '../../hooks/useProduct';
-import { Product } from '../../types/product';
+import type { Product } from '../../types/product';
 import * as productService from '../../services';
+import { renderWithRouter } from '../../test/test-utils';
 
 // Mock the product service
 vi.mock('../../services', () => ({
@@ -27,49 +25,6 @@ const ProductPageTest = () => {
   );
 };
 
-function createTestRouter(productId: string = '1') {
-  const rootRoute = createRootRoute();
-  
-  const productRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/products/$productId',
-    component: ProductPageTest,
-  });
-
-  const routeTree = rootRoute.addChildren([productRoute]);
-
-  const memoryHistory = createMemoryHistory({
-    initialEntries: [`/products/${productId}`],
-  });
-
-  return createRouter({
-    routeTree,
-    history: memoryHistory,
-  });
-}
-
-function renderProductPage(productId: string = '1') {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const router = createTestRouter(productId);
-
-  const Wrapper = () => (
-    <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <RouterProvider router={router} />
-      </CartProvider>
-    </QueryClientProvider>
-  );
-
-  return render(<Wrapper />);
-}
-
 const mockProduct: Product = {
   id: 1,
   title: 'Test Product',
@@ -90,13 +45,17 @@ describe('ProductDetail - Loading and Error States', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('shows loading state when product data is being fetched', async () => {
     // Return a promise that never resolves to simulate loading
     vi.mocked(productService.productService.getProduct).mockImplementation(
       () => new Promise(() => {})
     );
 
-    renderProductPage('1');
+    renderWithRouter(ProductPageTest, { productId: '1' });
 
     // Wait for the loading state to appear
     await waitFor(() => {
@@ -110,7 +69,7 @@ describe('ProductDetail - Loading and Error States', () => {
       new Error(errorMessage)
     );
 
-    renderProductPage('1');
+    renderWithRouter(ProductPageTest, { productId: '1' });
 
     // Wait for error to appear
     const errorElement = await screen.findByText(/error loading product/i);
@@ -121,7 +80,7 @@ describe('ProductDetail - Loading and Error States', () => {
   it('displays product when data is successfully loaded', async () => {
     vi.mocked(productService.productService.getProduct).mockResolvedValue(mockProduct);
 
-    renderProductPage('1');
+    renderWithRouter(ProductPageTest, { productId: '1' });
 
     // Wait for product to load
     await waitFor(() => {

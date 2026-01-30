@@ -1,12 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createMemoryHistory, createRootRoute, createRoute, createRouter, RouterProvider } from '@tanstack/react-router';
 import { ProductDetail } from './index';
-import { CartProvider } from '../../contexts/CartContext';
-import { Product } from '../../types/product';
+import type { Product } from '../../types/product';
 import * as productService from '../../services';
+import { renderWithRouter } from '../../test/test-utils';
 
 // Mock the product service
 vi.mock('../../services', () => ({
@@ -30,64 +28,19 @@ const mockProduct: Product = {
   images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
 };
 
-function createTestRouter(productId: string = '1') {
-  const rootRoute = createRootRoute();
-  
-  const productRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/products/$productId',
-    component: ProductDetail,
-  });
-
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/',
-    component: () => <div>Product List</div>,
-  });
-
-  const routeTree = rootRoute.addChildren([productRoute, indexRoute]);
-
-  const memoryHistory = createMemoryHistory({
-    initialEntries: [`/products/${productId}`],
-  });
-
-  return createRouter({
-    routeTree,
-    history: memoryHistory,
-  });
-}
-
-function renderProductDetail(productId: string = '1') {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-  const router = createTestRouter(productId);
-
-  const Wrapper = () => (
-    <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <RouterProvider router={router} />
-      </CartProvider>
-    </QueryClientProvider>
-  );
-
-  return render(<Wrapper />);
-}
-
 describe('ProductDetail Component', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders navigation with back link to product list', async () => {
     vi.mocked(productService.productService.getProduct).mockResolvedValue(mockProduct);
     
-    renderProductDetail('1');
+    renderWithRouter(ProductDetail, { productId: '1' });
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument();
@@ -101,7 +54,7 @@ describe('ProductDetail Component', () => {
   it('displays correct product information', async () => {
     vi.mocked(productService.productService.getProduct).mockResolvedValue(mockProduct);
     
-    renderProductDetail('1');
+    renderWithRouter(ProductDetail, { productId: '1' });
 
     // Wait for product to load
     await waitFor(() => {
@@ -129,7 +82,7 @@ describe('ProductDetail Component', () => {
     const productWithoutBrand = { ...mockProduct, brand: undefined };
     vi.mocked(productService.productService.getProduct).mockResolvedValue(productWithoutBrand);
     
-    renderProductDetail('1');
+    renderWithRouter(ProductDetail, { productId: '1' });
 
     await waitFor(() => {
       expect(screen.getByText('N/A')).toBeInTheDocument();
@@ -139,7 +92,7 @@ describe('ProductDetail Component', () => {
   it('renders Add to Cart button', async () => {
     vi.mocked(productService.productService.getProduct).mockResolvedValue(mockProduct);
     
-    renderProductDetail('1');
+    renderWithRouter(ProductDetail, { productId: '1' });
 
     await waitFor(() => {
       const addToCartButton = screen.getByRole('button', { name: /add to cart/i });
@@ -147,10 +100,10 @@ describe('ProductDetail Component', () => {
     });
   });
 
-  it('handles Add to Cart button click', async () => {
+  it('handles Add to Cart button click without errors', async () => {
     vi.mocked(productService.productService.getProduct).mockResolvedValue(mockProduct);
     
-    renderProductDetail('1');
+    renderWithRouter(ProductDetail, { productId: '1' });
     
     const user = userEvent.setup();
 
@@ -159,10 +112,11 @@ describe('ProductDetail Component', () => {
     });
 
     const addToCartButton = screen.getByRole('button', { name: /add to cart/i });
-    await user.click(addToCartButton);
-
-    // Since we can't easily verify cart state without exposing it,
-    // we just verify the button is clickable without errors
+    
+    // Click the button and verify no errors are thrown
+    await expect(user.click(addToCartButton)).resolves.not.toThrow();
+    
+    // Button should still be present after clicking
     expect(addToCartButton).toBeInTheDocument();
   });
 
@@ -170,7 +124,7 @@ describe('ProductDetail Component', () => {
     const productWithOnlyThumbnail = { ...mockProduct, images: [] };
     vi.mocked(productService.productService.getProduct).mockResolvedValue(productWithOnlyThumbnail);
     
-    renderProductDetail('1');
+    renderWithRouter(ProductDetail, { productId: '1' });
 
     await waitFor(() => {
       const image = screen.getByAltText('Test Product');
@@ -181,7 +135,7 @@ describe('ProductDetail Component', () => {
   it('applies correct CSS module classes to container', async () => {
     vi.mocked(productService.productService.getProduct).mockResolvedValue(mockProduct);
     
-    const { container } = renderProductDetail('1');
+    const { container } = renderWithRouter(ProductDetail, { productId: '1' });
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument();

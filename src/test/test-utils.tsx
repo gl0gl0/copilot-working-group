@@ -1,21 +1,27 @@
-import { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { render, screen, waitFor, within, fireEvent, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createMemoryHistory, createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
 import { CartProvider } from '../contexts/CartContext';
+import type React from 'react';
 
-// Create a wrapper for tests
-export function createWrapper() {
-  const queryClient = new QueryClient({
+// Create a fresh QueryClient for each test
+export function createTestQueryClient() {
+  return new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
       },
     },
   });
+}
+
+// Create a wrapper for tests
+export function createWrapper(queryClient?: QueryClient) {
+  const client = queryClient || createTestQueryClient();
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <CartProvider>{children}</CartProvider>
     </QueryClientProvider>
   );
@@ -24,22 +30,32 @@ export function createWrapper() {
 // Custom render function with all providers
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  options?: Omit<RenderOptions, 'wrapper'> & { queryClient?: QueryClient }
 ) {
-  return render(ui, { wrapper: createWrapper(), ...options });
+  const queryClient = options?.queryClient || createTestQueryClient();
+  return render(ui, { wrapper: createWrapper(queryClient), ...options });
 }
 
 // Helper to create a test router for components that need routing context
-export function createTestRouter(productId: string = '1') {
+export function createTestRouter(
+  component: React.ComponentType,
+  productId: string = '1'
+) {
   const rootRoute = createRootRoute();
   
   const productRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/products/$productId',
-    component: () => null,
+    component: component,
   });
 
-  const routeTree = rootRoute.addChildren([productRoute]);
+  const indexRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/',
+    component: () => <div>Product List</div>,
+  });
+
+  const routeTree = rootRoute.addChildren([productRoute, indexRoute]);
 
   const memoryHistory = createMemoryHistory({
     initialEntries: [`/products/${productId}`],
@@ -53,28 +69,24 @@ export function createTestRouter(productId: string = '1') {
 
 // Helper to render with full router context
 export function renderWithRouter(
-  ui: ReactElement,
-  { productId = '1', ...options }: RenderOptions & { productId?: string } = {}
+  component: React.ComponentType,
+  { productId = '1', queryClient: providedQueryClient, ...options }: RenderOptions & { productId?: string; queryClient?: QueryClient } = {}
 ) {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
+  const queryClient = providedQueryClient || createTestQueryClient();
 
-  const router = createTestRouter(productId);
+  const router = createTestRouter(component, productId);
 
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = () => (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router}>
-        <CartProvider>{children}</CartProvider>
-      </RouterProvider>
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
     </QueryClientProvider>
   );
 
-  return render(ui, { wrapper: Wrapper, ...options });
+  return { ...render(<Wrapper />, options), queryClient };
 }
 
-export * from '@testing-library/react';
+// Re-export only testing utilities, not components
+export { render, screen, waitFor, within, fireEvent };
+
