@@ -89,7 +89,7 @@ Previews the production build locally. Good for checkin' things out before deplo
 Here's where everything's kept in this here codebase:
 
 - **`src/`** - Main application source code
-  - **`components/`** - React components (12 subdirectories worth)
+  - **`components/`** - React components (10 subdirectories worth)
   - **`routes/`** - TanStack Router route definitions
   - **`hooks/`** - Custom React hooks
   - **`contexts/`** - React context providers
