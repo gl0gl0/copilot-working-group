@@ -40,7 +40,7 @@ const mockProduct: Product = {
   images: ['https://example.com/image.jpg'],
 };
 
-describe('ProductDetail - Loading and Error States', () => {
+describe('Product Page - Loading and Error States', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
